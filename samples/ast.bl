@@ -1,0 +1,24 @@
+ast :: namespace {
+
+Expr_Null :: struct { }
+Expr_Identifier :: struct { name: *char }
+
+Expr_Kind :: enum(u8) {
+    Null = 0
+    Identifier = 1
+}
+
+Expr_Data :: union { Expr_Null, Expr_Identifier }
+
+Expr :: struct {
+    kind: Expr_Kind
+    data: Expr_Data
+}
+
+main :: fn(argc: i32, argv: **char) -> i32 {
+    null_: *Expr = &Expr{ Expr_Kind::Null, Expr_Null{ } }
+    ident: *Expr = &Expr{ Expr_Kind::Identifier, Expr_Identifier{ "whatever" } }  
+    return 0
+}
+
+}
