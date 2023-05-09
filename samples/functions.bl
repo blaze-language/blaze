@@ -1,10 +1,10 @@
 functions :: namespace {
 
-no_ret_type :: fn() {
+no_return_type :: fn() {
 
 }
 
-multi_ret_type :: fn() -> i32, i32 {
+multiple_return_types :: fn() -> i32, i32 {
     return 1, 2
 }
 

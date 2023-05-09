@@ -647,6 +647,21 @@ impl Lexer {
                         },
                     })
                 }
+                '$' => {
+                    let start: usize = self.start;
+                    self.advance();
+                    self.start += 1;
+                    self.end = self.start;
+                    self.tokens.push(Token {
+                        kind: TokenKind::Dollar,
+                        literal: None,
+                        span: Span {
+                            filename: self.filename.clone(),
+                            start,
+                            end: self.end,
+                        },
+                    })
+                }
                 '+' => {
                     let start: usize = self.start;
                     self.advance();

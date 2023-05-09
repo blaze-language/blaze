@@ -1,0 +1,7 @@
+generics :: namespace {
+
+my_generic_function :: fn(t: $T) {
+    
+}
+
+}

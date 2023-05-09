@@ -572,6 +572,11 @@ impl Parser {
                 let t: Type = self.parse_type()?;
                 Type::Optional(Box::new(t), span.clone())
             }
+            TokenKind::Dollar => {
+                self.expect(TokenKind::Dollar)?;
+                let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
+                Type::Generic(identifier, span.clone())
+            }
             _ => {
                 let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
                 Type::Unknown(identifier, span.clone())

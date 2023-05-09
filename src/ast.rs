@@ -49,6 +49,8 @@ pub enum Type {
 
     VarArgs(Box<Option<Type>>, Span),
 
+    Generic(String, Span),
+
     Unknown(String, Span),
     Struct(String, Span),
     Enum(String, Span),
@@ -148,6 +150,7 @@ impl Type {
             Type::Pointer(_, s) => s.clone(),
             Type::Optional(_, s) => s.clone(),
             Type::VarArgs(_, s) => s.clone(),
+            Type::Generic(_, s) => s.clone(),
             Type::Unknown(_, s) => s.clone(),
             Type::Struct(_, s) => s.clone(),
             Type::Enum(_, s) => s.clone(),
@@ -181,6 +184,7 @@ impl Type {
                     "...".to_string()
                 }
             }
+            Type::Generic(name, _) => format!("${}", name.clone()),
             Type::Unknown(name, _) => format!("unknown {}", name.clone()),
             Type::Struct(name, _) => format!("struct {}", name.clone()),
             Type::Enum(name, _) => format!("enum {}", name.clone()),

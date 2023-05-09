@@ -72,6 +72,7 @@ use crate::span::Span;
     QuestionMark,
     Bang,
     Ampersand,
+    Dollar,
 
     // Arithmetic
     Plus,
