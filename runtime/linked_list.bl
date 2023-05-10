@@ -1,0 +1,9 @@
+io :: import "std/io"
+
+linked_list :: namespace {
+
+LinkedList :: fn(comptime T: type) -> type {
+    
+}
+
+}

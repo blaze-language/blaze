@@ -84,7 +84,7 @@ impl Typechecker {
             }
             Statement::Function(identifier, parameters, return_type, body, _) => {
                 self.current_scope.functions.insert(identifier.clone(), (
-                    parameters.clone().into_iter().map(|(identifier, ty, _)| (identifier, ty.clone())).collect(),
+                    parameters.clone().into_iter().map(|(identifier, ty, _, _)| (identifier, ty.clone())).collect(),
                     return_type.clone()
                 ));
                 self.open_new_scope();
@@ -94,7 +94,7 @@ impl Typechecker {
                     if let Err(error) = result {
                         self.errors.push(error);
                     }
-                    self.current_scope.parameters.insert(parameter.0.clone(), (parameter.1.clone(), parameter.2.clone()));
+                    self.current_scope.parameters.insert(parameter.0.clone(), (parameter.1.clone(), parameter.2.clone(), parameter.3.clone()));
                 }
                 for statement in body {
                     let result: Result<(), BlazeError> = self.typecheck_statement(statement);
@@ -107,7 +107,7 @@ impl Typechecker {
             }
             Statement::StructFunction(_, identifier, parameters, return_type, body, _) => {
                 self.current_scope.functions.insert(identifier.clone(), (
-                    parameters.clone().into_iter().map(|(identifier, ty, _)| (identifier, ty.clone())).collect(),
+                    parameters.clone().into_iter().map(|(identifier, ty, _, _)| (identifier, ty.clone())).collect(),
                     return_type.clone()
                 ));
                 self.open_new_scope();
@@ -117,7 +117,7 @@ impl Typechecker {
                     if let Err(error) = result {
                         self.errors.push(error);
                     }
-                    self.current_scope.parameters.insert(parameter.0.clone(), (parameter.1.clone(), parameter.2.clone()));
+                    self.current_scope.parameters.insert(parameter.0.clone(), (parameter.1.clone(), parameter.2.clone(), parameter.3.clone()));
                 }
                 for statement in body {
                     let result: Result<(), BlazeError> = self.typecheck_statement(statement);

@@ -84,6 +84,8 @@ impl Parser {
                 self.parse_union(identifier, span)
             } else if self.current()?.kind == TokenKind::Fn {
                 self.parse_fn(identifier, span)
+            } else if self.current()?.kind == TokenKind::Import {
+                self.parse_import(identifier, span)
             } else {
                 let value: Expression = self.parse_expression()?;
                 self.expect_optional_newline()?;
@@ -241,7 +243,7 @@ impl Parser {
             if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let span: Span = self.current()?.span;
             let comptime: bool = if self.current()?.kind == TokenKind::Comptime {
-                self.expect(TokenKind::Comptime);
+                self.expect(TokenKind::Comptime)?;
                 true
             } else { false };
             if self.current()?.kind == TokenKind::SelfKeyword {
@@ -302,6 +304,12 @@ impl Parser {
         } else {
             Ok(Statement::Function(identifier, parameters, returns, statements, span))
         }
+    }
+    fn parse_import(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
+        self.expect(TokenKind::Import)?;
+        let path: String = self.expect(TokenKind::StringLiteral)?.literal.unwrap();
+        self.expect_optional_newline()?;
+        Ok(Statement::Import(identifier, path, span))
     }
     fn parse_return(&mut self) -> Result<Statement, BlazeError> {
         let span: Span = self.current()?.span;

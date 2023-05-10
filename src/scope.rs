@@ -12,7 +12,7 @@ pub struct Scope {
     pub consts: HashMap<String, (Type, Expression)>,
     pub variables: HashMap<String, (Type, Expression)>,
     pub mutables: HashMap<String, (Type, Expression)>,
-    pub parameters: HashMap<String, (Type, Span)>,
+    pub parameters: HashMap<String, (Type, bool, Span)>,
 }
 
 impl Scope {
@@ -47,7 +47,7 @@ impl Scope {
                 return Some((ty, expr));
             }
         }
-        for (param_id, (ty, _)) in self.parameters.clone() {
+        for (param_id, (ty, _, _)) in self.parameters.clone() {
             if param_id == identifier {
                 return Some((ty, Expression::Identifier(identifier, span)));
             }

@@ -6,7 +6,7 @@ pub enum Statement {
     VariableDeclaration(String, Type, Expression, Span),
     MutableDeclaration(String, Type, Expression, Span),
     Namespace(String, Vec<Statement>, Span),
-    Import(String, Expression, Span),
+    Import(String, String, Span),
     Struct(String, Vec<String>, Vec<StructField>, Span),
     Enum(String, Vec<EnumVariant>, Span),
     TypedEnum(String, Type, Vec<EnumVariant>, Span),
