@@ -288,6 +288,7 @@ impl Typechecker {
                 }
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 

@@ -1,0 +1,6 @@
+vec :: namespace {
+
+Vec2 :: struct { x: $T, y: $T }
+Vec3 :: struct { x: $T, y: $T, z: $T }
+
+}

@@ -3,7 +3,11 @@ io :: import "std/io"
 linked_list :: namespace {
 
 LinkedList :: fn(comptime T: type) -> type {
-    
+    Node :: struct {
+        data: T
+        next: *Node
+    }
+    return Node
 }
 
 }

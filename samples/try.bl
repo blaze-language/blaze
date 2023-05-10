@@ -1,0 +1,6 @@
+io :: import "std/io"
+
+main :: fn(argc: i32, argv: **char) -> !void {
+
+    return 0
+}

@@ -507,6 +507,11 @@ impl Parser {
                 let expression: Expression = self.parse_expression()?;
                 Ok(Expression::Dereference(Box::new(expression), span))
             }
+            TokenKind::Try => {
+                self.expect(TokenKind::Try)?;
+                let expression: Expression = self.parse_expression()?;
+                Ok(Expression::Try(Box::new(expression), span))
+            }
             _ => {
                 Err(BlazeError::ParseError(format!("expected expression, but got {:?}", self.current()?.kind), span))
             }
