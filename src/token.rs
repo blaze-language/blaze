@@ -19,6 +19,8 @@ use crate::span::Span;
     Mut,
     If,
     Else,
+    Import,
+    Comptime,
 
     // Types
     I8,
