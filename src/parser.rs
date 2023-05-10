@@ -232,7 +232,7 @@ impl Parser {
     }
     fn parse_fn(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
         self.expect(TokenKind::Fn)?;
-        let mut parameters: Vec<(String, Type, Span)> = Vec::new();
+        let mut parameters: Vec<(String, Type, bool, Span)> = Vec::new();
         let mut returns: Vec<Type> = vec![Type::Void(span.clone())];
         let mut struct_name: Option<Type> = None;
         self.expect(TokenKind::OpenParenthesis)?;
@@ -240,6 +240,10 @@ impl Parser {
         while self.current()?.kind != TokenKind::CloseParenthesis {
             if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let span: Span = self.current()?.span;
+            let comptime: bool = if self.current()?.kind == TokenKind::Comptime {
+                self.expect(TokenKind::Comptime);
+                true
+            } else { false };
             if self.current()?.kind == TokenKind::SelfKeyword {
                 self.expect(TokenKind::SelfKeyword)?;
                 self.expect(TokenKind::Colon)?;
@@ -255,20 +259,20 @@ impl Parser {
             if self.current()?.kind == TokenKind::Elipsis {
                 let var_args_span: Span = self.current()?.span;
                 self.expect(TokenKind::Elipsis)?;
-                parameters.push((identifier, Type::VarArgs(Box::new(None), var_args_span.clone()), span));
+                parameters.push((identifier, Type::VarArgs(Box::new(None), var_args_span.clone()), comptime, span));
                 break;
             }
             let ty: Type = self.parse_type()?;
             if self.current()?.kind == TokenKind::Elipsis {
                 let var_args_span: Span = self.current()?.span;
                 self.expect(TokenKind::Elipsis)?;
-                parameters.push((identifier, Type::VarArgs(Box::new(Some(ty)), var_args_span.clone()), span));
+                parameters.push((identifier, Type::VarArgs(Box::new(Some(ty)), var_args_span.clone()), comptime, span));
                 break;
             }
             if self.current()?.kind != TokenKind::CloseParenthesis {
                 self.expect(TokenKind::Comma)?;
             }
-            parameters.push((identifier, ty, span));
+            parameters.push((identifier, ty, comptime, span));
         }
         self.expect_optional_newline()?;
         self.expect(TokenKind::CloseParenthesis)?;
