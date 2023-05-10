@@ -33,6 +33,7 @@ pub enum Expression {
     StructLiteral(String, Vec<(Option<String>, Expression, Span)>, Span),
     AddressOf(Box<Expression>, Span),
     Dereference(Box<Expression>, Span),
+    Try(Box<Expression>, Span),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -110,6 +111,7 @@ impl Expression {
             Expression::StructLiteral(_, _, s) => s.clone(),
             Expression::AddressOf(_, s) => s.clone(),
             Expression::Dereference(_, s) => s.clone(),
+            Expression::Try(_, s) => s.clone(),
         }
     }
 
