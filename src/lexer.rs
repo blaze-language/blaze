@@ -86,6 +86,7 @@ impl Lexer {
                         "else" => TokenKind::Else,
                         "import" => TokenKind::Import,
                         "comptime" => TokenKind::Comptime,
+                        "try" => TokenKind::Try,
                         _ => TokenKind::Identifier,
                     };
                     self.tokens.push(Token {

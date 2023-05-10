@@ -21,6 +21,7 @@ use crate::span::Span;
     Else,
     Import,
     Comptime,
+    Try,
 
     // Types
     I8,
