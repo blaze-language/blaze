@@ -128,6 +128,16 @@ impl Parser {
     }
     fn parse_struct(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
         self.expect(TokenKind::Struct)?;
+        let mut generic_parameters: Vec<Type> = Vec::new();
+        if self.current()?.kind == TokenKind::Less {
+            self.expect(TokenKind::Less)?;
+            generic_parameters.push(self.parse_type()?);
+            while self.current()?.kind == TokenKind::Comma {
+                self.expect(TokenKind::Comma)?;
+                generic_parameters.push(self.parse_type()?);
+            }
+            self.expect(TokenKind::Greater)?;
+        }
         let mut inherits: Vec<String> = Vec::new();
         let mut fields: Vec<StructField> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
@@ -159,7 +169,7 @@ impl Parser {
         self.expect_optional_newline()?;
         self.expect(TokenKind::CloseBrace)?;
         self.expect_optional_newline()?;
-        Ok(Statement::Struct(identifier, inherits, fields, span))
+        Ok(Statement::Struct(identifier, generic_parameters, inherits, fields, span))
     }
     fn parse_enum(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
         self.expect(TokenKind::Enum)?;
@@ -597,17 +607,22 @@ impl Parser {
                 let t: Type = self.parse_type()?;
                 Type::Optional(Box::new(t), span.clone())
             }
+            TokenKind::Dollar => {
+                self.expect(TokenKind::Dollar)?;
+                let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
+                Type::Generic(identifier, span.clone())
+            }
             _ => {
                 let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
-                if self.current()?.kind == TokenKind::OpenParenthesis {
-                    self.expect(TokenKind::OpenParenthesis)?;
+                if self.current()?.kind == TokenKind::Less {
+                    self.expect(TokenKind::Less)?;
                     let mut types: Vec<Type> = vec![self.parse_type()?];
                     while self.current()?.kind == TokenKind::Comma {
                         self.expect(TokenKind::Comma)?;
                         types.push(self.parse_type()?);
                     }
-                    self.expect(TokenKind::CloseParenthesis)?;
-                    return Ok(Type::Generic(identifier, types, span));
+                    self.expect(TokenKind::Greater)?;
+                    return Ok(Type::GenericInstance(identifier, types, span));
                 }
                 Type::Unknown(identifier, span.clone())
             }

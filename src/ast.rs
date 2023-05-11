@@ -7,7 +7,7 @@ pub enum Statement {
     MutableDeclaration(String, Type, Expression, Span),
     Namespace(String, Vec<Statement>, Span),
     Import(String, String, Span),
-    Struct(String, Vec<String>, Vec<StructField>, Span),
+    Struct(String, Vec<Type>, Vec<String>, Vec<StructField>, Span),
     Enum(String, Vec<EnumVariant>, Span),
     TypedEnum(String, Type, Vec<EnumVariant>, Span),
     Union(String, Vec<Type>, Span),
@@ -54,7 +54,8 @@ pub enum Type {
 
     VarArgs(Box<Option<Type>>, Span),
 
-    Generic(String, Vec<Type>, Span),
+    GenericInstance(String, Vec<Type>, Span),
+    Generic(String, Span),
 
     Unknown(String, Span),
     Struct(String, Span),
@@ -85,7 +86,7 @@ impl Statement {
             Statement::MutableDeclaration(_, _, _, s) => s.clone(),
             Statement::Import(_, _, s) => s.clone(),
             Statement::Namespace(_, _, s) => s.clone(),
-            Statement::Struct(_, _, _, s) => s.clone(),
+            Statement::Struct(_, _, _, _, s) => s.clone(),
             Statement::Enum(_, _, s) => s.clone(),
             Statement::TypedEnum(_, _, _, s) => s.clone(),
             Statement::Union(_, _, s) => s.clone(),
@@ -159,7 +160,8 @@ impl Type {
             Type::Pointer(_, s) => s.clone(),
             Type::Optional(_, s) => s.clone(),
             Type::VarArgs(_, s) => s.clone(),
-            Type::Generic(_, _, s) => s.clone(),
+            Type::GenericInstance(_, _, s) => s.clone(),
+            Type::Generic(_, s) => s.clone(),
             Type::Unknown(_, s) => s.clone(),
             Type::Struct(_, s) => s.clone(),
             Type::Enum(_, s) => s.clone(),
@@ -194,7 +196,8 @@ impl Type {
                     "...".to_string()
                 }
             }
-            Type::Generic(name, types, _) => format!("{}({})", name.clone(), types.iter().map(|t| t.name()).collect::<Vec<String>>().join(", ")),
+            Type::GenericInstance(name, types, _) => format!("{}({})", name.clone(), types.iter().map(|t| t.name()).collect::<Vec<String>>().join(", ")),
+            Type::Generic(name, _) => format!("${}", name.clone()),
             Type::Unknown(name, _) => format!("unknown {}", name.clone()),
             Type::Struct(name, _) => format!("struct {}", name.clone()),
             Type::Enum(name, _) => format!("enum {}", name.clone()),

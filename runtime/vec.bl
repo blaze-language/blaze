@@ -1,6 +1,6 @@
 vec :: namespace {
 
-Vec2 :: struct { x: $T, y: $T }
-Vec3 :: struct { x: $T, y: $T, z: $T }
+Vec2 :: struct($T) { x: $T, y: $T }
+Vec3 :: struct($T) { x: $T, y: $T, z: $T }
 
 }

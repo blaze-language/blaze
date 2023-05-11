@@ -1,20 +1,17 @@
-io :: import "std/io"
+string :: import "std/string"
+
+String :: struct { data: *char, length: u64 }
+String_View :: struct { data: *char, length: u64 }
 
 linked_list :: namespace {
 
-Node :: fn(comptime T: type) -> type {
-    return struct { data: T, next: *Node(T) }
-}
-
-LinkedList :: fn(comptime T: type) -> type {
-    return struct { head: *Node(T), tail: *Node(T) }
-}
+Node :: struct<$T> { data: $T, next: *Node<$T> }
+Linked_List :: struct<$T> { head: *Node<$T>, tail: *Node<$T> }
 
 }
 
 main :: fn() -> i32 {
-    int_list: *LinkedList(i32) = null
-    char_list: *LinkedList(char) = null
+    int_list: *Linked_List<i32> = null
 
     return 0
 }
