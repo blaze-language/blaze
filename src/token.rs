@@ -22,6 +22,7 @@ use crate::span::Span;
     Import,
     Comptime,
     Try,
+    Null,
 
     // Types
     I8,
@@ -37,6 +38,7 @@ use crate::span::Span;
     Char,
     Bool,
     Void,
+    Type,
 
     // Literals
     Identifier,

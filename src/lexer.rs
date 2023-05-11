@@ -73,6 +73,7 @@ impl Lexer {
                         "char" => TokenKind::Char,
                         "bool" => TokenKind::Bool,
                         "void" => TokenKind::Void,
+                        "type" => TokenKind::Type,
                         "namespace" => TokenKind::Namespace,
                         "fn" => TokenKind::Fn,
                         "return" => TokenKind::Return,
@@ -87,6 +88,7 @@ impl Lexer {
                         "import" => TokenKind::Import,
                         "comptime" => TokenKind::Comptime,
                         "try" => TokenKind::Try,
+                        "null" => TokenKind::Null,
                         _ => TokenKind::Identifier,
                     };
                     self.tokens.push(Token {
