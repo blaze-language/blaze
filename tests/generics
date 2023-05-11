@@ -1,0 +1,16 @@
+# 0 "tests/generics.c"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "tests/generics.c"
+# 17 "tests/generics.c"
+int main(void) {
+    typedef struct Node_int Node_int; struct Node_int { int data; Node_int* next; };
+    typedef struct LinkedList_int LinkedList_int; struct LinkedList_int { Node_int* head; Node_int* tail; };
+    LinkedList_int* int_list = ((void *)0);
+
+    typedef struct Node_char Node_char; struct Node_char { char data; Node_char* next; };
+    typedef struct LinkedList_char LinkedList_char; struct LinkedList_char { Node_char* head; Node_char* tail; };
+    LinkedList_char* char_list = ((void *)0);
+
+    return 0;
+}

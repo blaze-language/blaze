@@ -2,12 +2,19 @@ io :: import "std/io"
 
 linked_list :: namespace {
 
-LinkedList :: fn(comptime T: type) -> type {
-    Node :: struct {
-        data: T
-        next: *Node
-    }
-    return Node
+Node :: fn(comptime T: type) -> type {
+    return struct { data: T, next: *Node(T) }
 }
 
+LinkedList :: fn(comptime T: type) -> type {
+    return struct { head: *Node(T), tail: *Node(T) }
+}
+
+}
+
+main :: fn() -> i32 {
+    int_list: *LinkedList(i32) = null
+    char_list: *LinkedList(char) = null
+
+    return 0
 }
