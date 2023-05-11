@@ -512,6 +512,10 @@ impl Parser {
                 let expression: Expression = self.parse_expression()?;
                 Ok(Expression::Try(Box::new(expression), span))
             }
+            TokenKind::Null => {
+                self.expect(TokenKind::Null)?;
+                Ok(Expression::Null(span))
+            }
             _ => {
                 Err(BlazeError::ParseError(format!("expected expression, but got {:?}", self.current()?.kind), span))
             }
@@ -573,6 +577,10 @@ impl Parser {
                 self.expect(TokenKind::Void)?;
                 Type::Void(span.clone())
             }
+            TokenKind::Type => {
+                self.expect(TokenKind::Type)?;
+                Type::Type(span.clone())
+            }
             TokenKind::Asterisk => {
                 self.expect(TokenKind::Asterisk)?;
                 let t: Type = self.parse_type()?;
@@ -589,13 +597,18 @@ impl Parser {
                 let t: Type = self.parse_type()?;
                 Type::Optional(Box::new(t), span.clone())
             }
-            TokenKind::Dollar => {
-                self.expect(TokenKind::Dollar)?;
-                let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
-                Type::Generic(identifier, span.clone())
-            }
             _ => {
                 let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
+                if self.current()?.kind == TokenKind::OpenParenthesis {
+                    self.expect(TokenKind::OpenParenthesis)?;
+                    let mut types: Vec<Type> = vec![self.parse_type()?];
+                    while self.current()?.kind == TokenKind::Comma {
+                        self.expect(TokenKind::Comma)?;
+                        types.push(self.parse_type()?);
+                    }
+                    self.expect(TokenKind::CloseParenthesis)?;
+                    return Ok(Type::Generic(identifier, types, span));
+                }
                 Type::Unknown(identifier, span.clone())
             }
         };
