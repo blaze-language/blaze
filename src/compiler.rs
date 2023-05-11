@@ -3,7 +3,6 @@ use crate::lexer::Lexer;
 use crate::error::BlazeError;
 use crate::token::Token;
 use crate::parser::Parser;
-// use crate::typechecker::Typechecker;
 
 pub struct Compiler {
     pub files: Vec<String>,
@@ -41,14 +40,6 @@ impl Compiler {
                 self.errors.extend(errors);
                 continue;
             }
-
-            // NOTE: Commented out because it causes a stack overflow error for some reason (???)
-            // let mut typechecker: Typechecker = Typechecker::new(statements.unwrap());
-            // let result: Result<(), Vec<BlazeError>> = typechecker.typecheck();
-            // if let Err(errors) = result.clone() {
-            //     self.errors.extend(errors);
-            //     continue;
-            // }
 
             println!("Compiled {}", file);
         }
