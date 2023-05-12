@@ -11,7 +11,7 @@ Linked_List :: struct<$T> { head: *Node<$T>, tail: *Node<$T> }
 }
 
 main :: fn() -> i32 {
-    int_list: *Linked_List<i32> = null
+    int_list: *Linked_List<i32> = null;
 
-    return 0
+    return 0;
 }

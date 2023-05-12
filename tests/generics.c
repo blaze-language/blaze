@@ -1,10 +1,16 @@
 typedef unsigned long size_t;
 
 typedef struct String String;
-struct String { char* data; size_t length; };
+struct String {
+    char* data;
+    size_t length;
+};
 
 typedef struct String_View String_View;
-struct String_View { char* data; size_t length; };
+struct String_View {
+    char* data;
+    size_t length;
+};
 
 #define Node(T) Node__##T
 #define Node__definition(T) \
@@ -23,14 +29,11 @@ struct String_View { char* data; size_t length; };
     };
 
     
-Node__definition(int)
-Linked_List__definition(int)
 
 int main(void) {
-    Linked_List(int)* int_list = &(Linked_List(int)){
-        .head = ((void *)0),
-        .tail = ((void *)0),
-    };
+    Node__definition(int)
+    Linked_List__definition(int)
+    Linked_List(int)* int_list = ((void*)0);
 
     return 0;
 }

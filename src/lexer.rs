@@ -37,15 +37,15 @@ impl Lexer {
                     self.advance();
                     self.start += 1;
                     self.end = start;
-                    self.tokens.push(Token {
-                        kind: TokenKind::Newline,
-                        literal: None,
-                        span: Span {
-                            filename: self.filename.clone(),
-                            start,
-                            end: self.end,
-                        },
-                    })
+                    // self.tokens.push(Token {
+                    //     kind: TokenKind::Newline,
+                    //     literal: None,
+                    //     span: Span {
+                    //         filename: self.filename.clone(),
+                    //         start,
+                    //         end: self.end,
+                    //     },
+                    // })
                 }
                 'a'..='z' | 'A'..='Z' | '_' => {
                     let mut literal: String = String::new();

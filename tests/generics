@@ -5,19 +5,21 @@
 typedef unsigned long size_t;
 
 typedef struct String String;
-struct String { char* data; size_t length; };
+struct String {
+    char* data;
+    size_t length;
+};
 
 typedef struct String_View String_View;
-struct String_View { char* data; size_t length; };
-# 26 "tests/generics.c"
-typedef struct Node__int Node__int; struct Node__int { int data; Node__int* next; };
-typedef struct Linked_List__int Linked_List__int; struct Linked_List__int { Node__int* head; Node__int* tail; };
-
+struct String_View {
+    char* data;
+    size_t length;
+};
+# 33 "tests/generics.c"
 int main(void) {
-    Linked_List__int* int_list = &(Linked_List__int){
-        .head = ((void *)0),
-        .tail = ((void *)0),
-    };
+    typedef struct Node__int Node__int; struct Node__int { int data; Node__int* next; };
+    typedef struct Linked_List__int Linked_List__int; struct Linked_List__int { Node__int* head; Node__int* tail; };
+    Linked_List__int* int_list = ((void*)0);
 
     return 0;
 }

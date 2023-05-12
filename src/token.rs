@@ -95,6 +95,6 @@ use crate::span::Span;
     PercentEquals,
 
     // Misc
-    Newline,
+    // Newline,
     EndOfFile,
 }

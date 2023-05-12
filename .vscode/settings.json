@@ -4,6 +4,9 @@
         "math.h": "c",
         "corecrt.h": "c",
         "stdio.h": "c",
-        "corecrt_math_defines.h": "c"
+        "corecrt_math_defines.h": "c",
+        "xstring": "cpp",
+        "array": "c",
+        "string_view": "cpp"
     }
 }

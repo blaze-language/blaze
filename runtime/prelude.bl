@@ -1,32 +1,32 @@
 blaze :: namespace {
 
 String :: struct {
-    count: i32
+    count: i32,
     data: []char
 }
 
-length :: fn(self: *String) -> i32 { return self.count }
-cstr :: fn(self: *String) -> []char { return self.data }
+length :: fn(self: *String) -> i32 { return self.count; }
+cstr :: fn(self: *String) -> []char { return self.data; }
 
 println :: fn(fmt: []char, args: ...) -> void {
     
 }
 
 strlen :: fn(str: []char) -> i32 {
-    mut index: i32 = 0
+    mut index: i32 = 0;
     while str[index] != '\0' {
-        index += 1
+        index += 1;
     }
-    return index
+    return index;
 }
 
 MyTypedEnum :: enum(u8) {
-    Abc = 1
+    Abc = 1,
     Def
 }
 
 MyEnum :: enum {
-    Abc
+    Abc,
     Def
 }
 

@@ -22,11 +22,6 @@ impl Parser {
     }
     pub fn parse(&mut self) -> Result<Vec<Statement>, Vec<BlazeError>> {
         while self.current < self.tokens.len() {
-            let current: Token = self.tokens[self.current].clone();
-            if current.kind == TokenKind::Newline {
-                self.current += 1;
-                continue;
-            }
             let statement: Result<Statement, BlazeError> = self.parse_statement();
             match statement {
                 Ok(statement) => self.statements.push(statement),
@@ -45,10 +40,10 @@ impl Parser {
     }
     fn synchronize(&mut self) {
         while self.current < self.tokens.len() {
-            if self.tokens[self.current].kind == TokenKind::Newline {
-                self.current += 1;
-                return;
-            }
+            // if self.tokens[self.current].kind == TokenKind::Newline {
+            //     self.current += 1;
+            //     return;
+            // }
             self.current += 1;
         }
     }
@@ -63,7 +58,8 @@ impl Parser {
             _ => {
                 let span: Span = self.current()?.span;
                 let expression: Expression = self.parse_expression()?;
-                self.expect(TokenKind::Newline)?;
+                // self.expect(TokenKind::Newline)?;
+                self.expect(TokenKind::Semicolon)?;
                 Ok(Statement::Expression(expression, span))
             }
         }
@@ -88,7 +84,6 @@ impl Parser {
                 self.parse_import(identifier, span)
             } else {
                 let value: Expression = self.parse_expression()?;
-                self.expect_optional_newline()?;
                 Ok(Statement::ConstantDeclaration(identifier, Type::AwaitingInference, value, span))
             }
         } else if self.peek()?.kind == TokenKind::Colon {
@@ -97,17 +92,17 @@ impl Parser {
             let ty: Type = self.parse_type()?;
             self.expect(TokenKind::Equal)?;
             let value: Expression = self.parse_expression()?;
-            self.expect_optional_newline()?;
+            self.expect(TokenKind::Semicolon)?;
             Ok(Statement::VariableDeclaration(identifier, ty, value, span))
         } else if self.peek()?.kind == TokenKind::ColonEquals {
             let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
             self.expect(TokenKind::ColonEquals)?;
             let value: Expression = self.parse_expression()?;
-            self.expect_optional_newline()?;
+            self.expect(TokenKind::Semicolon)?;
             Ok(Statement::VariableDeclaration(identifier, Type::AwaitingInference, value, span))
         } else {
             let expression: Expression = self.parse_expression()?;
-            self.expect_optional_newline()?;
+            self.expect(TokenKind::Semicolon)?;
             Ok(Statement::Expression(expression, span))
         }
     }
@@ -115,15 +110,14 @@ impl Parser {
         self.expect(TokenKind::Namespace)?;
         let mut statements: Vec<Statement> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let statement: Statement = self.parse_statement()?;
             statements.push(statement);
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         Ok(Statement::Namespace(identifier, statements, span))
     }
     fn parse_struct(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
@@ -138,19 +132,13 @@ impl Parser {
             }
             self.expect(TokenKind::Greater)?;
         }
-        let mut inherits: Vec<String> = Vec::new();
+        let inherits: Vec<String> = Vec::new();
         let mut fields: Vec<StructField> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let span: Span = self.current()?.span;
             let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
-            if self.current()?.kind == TokenKind::Newline {
-                self.expect(TokenKind::Newline)?;
-                inherits.push(identifier);
-                continue;
-            }
             self.expect(TokenKind::Colon)?;
             let ty: Type = self.parse_type()?;
             fields.push(StructField {
@@ -158,17 +146,15 @@ impl Parser {
                 ty: ty,
                 span: span,
             });
-            if self.current()?.kind == TokenKind::Newline {
-                self.expect(TokenKind::Newline)?;
-            } else if self.current()?.kind == TokenKind::Comma {
+            if self.current()?.kind == TokenKind::Comma {
                 self.expect(TokenKind::Comma)?;
             } else {
                 break;
             }
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         Ok(Statement::Struct(identifier, generic_parameters, inherits, fields, span))
     }
     fn parse_enum(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
@@ -181,19 +167,17 @@ impl Parser {
         }
         let mut variants: Vec<EnumVariant> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let span: Span = self.current()?.span;
             let identifier: String = self.expect(TokenKind::Identifier)?.literal.unwrap();
-            if self.current()?.kind == TokenKind::Newline {
-                self.expect(TokenKind::Newline)?;
-                variants.push(EnumVariant::Unit(identifier, span));
-                continue;
-            } else if self.current()?.kind == TokenKind::Comma {
+            if self.current()?.kind == TokenKind::Comma {
                 self.expect(TokenKind::Comma)?;
                 variants.push(EnumVariant::Unit(identifier, span));
                 continue;
+            } else if self.current()?.kind == TokenKind::CloseBrace {
+                variants.push(EnumVariant::Unit(identifier, span));
+                break;
             }
             if self.current()?.kind == TokenKind::Equal && inner_ty.is_none() {
                 return Err(BlazeError::ParseError(format!("cannot assign value to enum variant without inner type"), span));
@@ -201,17 +185,15 @@ impl Parser {
             self.expect(TokenKind::Equal)?;
             let expression: Expression = self.parse_expression()?;
             variants.push(EnumVariant::Expression(identifier, expression, span));
-            if self.current()?.kind == TokenKind::Newline {
-                self.expect(TokenKind::Newline)?;
-            } else if self.current()?.kind == TokenKind::Comma {
+            if self.current()?.kind == TokenKind::Comma {
                 self.expect(TokenKind::Comma)?;
             } else {
                 break;
             }
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         if inner_ty.is_some() {
             Ok(Statement::TypedEnum(identifier, inner_ty.unwrap(), variants, span))
         } else {
@@ -222,14 +204,10 @@ impl Parser {
         self.expect(TokenKind::Union)?;
         let mut types: Vec<Type> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let ty: Type = self.parse_type()?;
-            if self.current()?.kind == TokenKind::Newline {
-                self.expect(TokenKind::Newline)?;
-                types.push(ty);
-            } else if self.current()?.kind == TokenKind::Comma {
+            if self.current()?.kind == TokenKind::Comma {
                 self.expect(TokenKind::Comma)?;
                 types.push(ty);
             } else {
@@ -237,9 +215,9 @@ impl Parser {
                 break;
             }
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         Ok(Statement::Union(identifier, types, span))
     }
     fn parse_fn(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
@@ -248,9 +226,8 @@ impl Parser {
         let mut returns: Vec<Type> = vec![Type::Void(span.clone())];
         let mut struct_name: Option<Type> = None;
         self.expect(TokenKind::OpenParenthesis)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseParenthesis {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let span: Span = self.current()?.span;
             let comptime: bool = if self.current()?.kind == TokenKind::Comptime {
                 self.expect(TokenKind::Comptime)?;
@@ -286,9 +263,9 @@ impl Parser {
             }
             parameters.push((identifier, ty, comptime, span));
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseParenthesis)?;
-        self.expect_optional_newline()?;
+        
         if self.current()?.kind == TokenKind::Arrow {
             self.expect(TokenKind::Arrow)?;
             returns.push(self.parse_type()?);
@@ -297,18 +274,17 @@ impl Parser {
                 returns.push(self.parse_type()?);
             }
         }
-        self.expect_optional_newline()?;
+        
         let mut statements: Vec<Statement> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let statement: Statement = self.parse_statement()?;
             statements.push(statement);
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         if struct_name.is_some() {
             Ok(Statement::StructFunction(struct_name.unwrap(), identifier, parameters, returns, statements, span))
         } else {
@@ -318,14 +294,14 @@ impl Parser {
     fn parse_import(&mut self, identifier: String, span: Span) -> Result<Statement, BlazeError> {
         self.expect(TokenKind::Import)?;
         let path: String = self.expect(TokenKind::StringLiteral)?.literal.unwrap();
-        self.expect_optional_newline()?;
+        
         Ok(Statement::Import(identifier, path, span))
     }
     fn parse_return(&mut self) -> Result<Statement, BlazeError> {
         let span: Span = self.current()?.span;
         self.expect(TokenKind::Return)?;
-        if self.current()?.kind == TokenKind::Newline {
-            self.expect_optional_newline()?;
+        if self.current()?.kind == TokenKind::Semicolon {
+            self.expect(TokenKind::Semicolon)?;
             Ok(Statement::Return(vec![], span))
         } else {
             let mut expressions: Vec<Expression> = vec![];
@@ -334,7 +310,7 @@ impl Parser {
                 self.expect(TokenKind::Comma)?;
                 expressions.push(self.parse_expression()?);
             }
-            self.expect_optional_newline()?;
+            self.expect(TokenKind::Semicolon)?;
             Ok(Statement::Return(expressions, span))
         }
     }
@@ -351,7 +327,7 @@ impl Parser {
             self.expect(TokenKind::Equal)?;
         }
         let value: Expression = self.parse_expression()?;
-        self.expect_optional_newline()?;
+        self.expect(TokenKind::Semicolon)?;
         Ok(Statement::MutableDeclaration(identifier, ty, value, span))
     }
     fn parse_while(&mut self) -> Result<Statement, BlazeError> {
@@ -360,15 +336,14 @@ impl Parser {
         let expression: Expression = self.parse_expression()?;
         let mut statements: Vec<Statement> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let statement: Statement = self.parse_statement()?;
             statements.push(statement);
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         Ok(Statement::While(expression, statements, span))
     }
 
@@ -379,27 +354,25 @@ impl Parser {
         let mut if_statements: Vec<Statement> = Vec::new();
         let mut else_statements: Vec<Statement> = Vec::new();
         self.expect(TokenKind::OpenBrace)?;
-        self.expect_optional_newline()?;
+        
         while self.current()?.kind != TokenKind::CloseBrace {
-            if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
             let statement: Statement = self.parse_statement()?;
             if_statements.push(statement);
         }
-        self.expect_optional_newline()?;
+        
         self.expect(TokenKind::CloseBrace)?;
-        self.expect_optional_newline()?;
+        
         if self.current()?.kind == TokenKind::Else {
             self.expect(TokenKind::Else)?;
             self.expect(TokenKind::OpenBrace)?;
-            self.expect_optional_newline()?;
+            
             while self.current()?.kind != TokenKind::CloseBrace {
-                if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
                 let statement: Statement = self.parse_statement()?;
                 else_statements.push(statement);
             }
-            self.expect_optional_newline()?;
+            
             self.expect(TokenKind::CloseBrace)?;
-            self.expect_optional_newline()?;
+            
         }
         Ok(Statement::If(expression, if_statements, else_statements, span))
     }
@@ -467,7 +440,6 @@ impl Parser {
                     self.expect(TokenKind::OpenBrace)?;
                     let mut fields: Vec<(Option<String>, Expression, Span)> = Vec::new();
                     while self.current()?.kind != TokenKind::CloseBrace {
-                        if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; continue; }
                         let span: Span = self.current()?.span;
                         let mut identifier: Option<String> = None;
                         if self.peek()?.kind == TokenKind::Colon {
@@ -475,16 +447,14 @@ impl Parser {
                             self.expect(TokenKind::Colon)?;
                         }
                         let expression: Expression = self.parse_expression()?;
-                        if self.current()?.kind == TokenKind::Newline {
-                            self.expect(TokenKind::Newline)?;
-                        } else if self.current()?.kind == TokenKind::Comma {
+                        if self.current()?.kind == TokenKind::Comma {
                             self.expect(TokenKind::Comma)?;
                         } else {
                             break;
                         }
                         fields.push((identifier, expression, span));
                     }
-                    self.expect_optional_newline()?;
+                    
                     self.expect(TokenKind::CloseBrace)?;
                     Ok(Expression::StructLiteral(identifier, fields, span))
                 } else {
@@ -659,10 +629,6 @@ impl Parser {
             return Err(BlazeError::ParseError(format!("unexpected end of file"), self.tokens[self.current - 1].span.clone()));
         }
         self.current += 1;
-        Ok(())
-    }
-    fn expect_optional_newline(&mut self) -> Result<(), BlazeError> {
-        if self.current()?.kind == TokenKind::Newline { self.expect(TokenKind::Newline)?; }
         Ok(())
     }
 }
